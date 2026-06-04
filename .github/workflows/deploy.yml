@@ -9,6 +9,9 @@ on:
       image_tag:
         description: 'Docker image tag to deploy'
         required: true
+        type: choice
+        options: [dev, staging, prod]
+        default: 'staging'
 
 env:
   APP_NAME: nodejs-app
