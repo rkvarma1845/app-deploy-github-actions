@@ -46,7 +46,7 @@ jobs:
           parameters: >
             appName=${{ env.APP_NAME }}
             acrName=${{ env.ACR_NAME }}
-          additionalArguments: --debug --verbose
+          additionalArguments: --verbose
 
       - name: Get ACR Credentials
         id: acr-creds
