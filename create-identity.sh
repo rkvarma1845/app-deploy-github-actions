@@ -18,17 +18,4 @@ PRINCIPAL_ID=$(az identity show \
   --query principalId \
   --output tsv)
 
-ACR_ID=$(az acr show \
-  --name $ACR_NAME \
-  --resource-group $RESOURCE_GROUP \
-  --query id \
-  --output tsv)
-
-echo "Assigning AcrPull role..."
-
-az role assignment create \
-  --assignee $PRINCIPAL_ID \
-  --role AcrPull \
-  --scope $ACR_ID
-
 echo "Done."
