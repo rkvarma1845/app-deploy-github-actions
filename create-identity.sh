@@ -1,10 +1,4 @@
 #!/bin/bash
-
-RESOURCE_GROUP="my-rg"
-LOCATION="centralindia"
-IDENTITY_NAME="my-uami"
-ACR_NAME="myacr"
-
 echo "Creating User Assigned Identity..."
 
 az identity create \
