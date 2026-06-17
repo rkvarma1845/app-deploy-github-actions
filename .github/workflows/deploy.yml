@@ -54,11 +54,12 @@ jobs:
       - name: Deploy Infrastructure
         run: |
           az deployment group create \
+            --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --template-file main.bicep \
             --parameters \
-              appName=${{ env.APP_NAME }} \
-              acrName=${{ env.ACR_NAME }} \
+              appName="${{ env.APP_NAME }}" \
+              acrName="${{ env.ACR_NAME }}" \
               userAssignedIdentityName=${{ env.IDENTITY_NAME }} \
             --debug \
             --verbose
