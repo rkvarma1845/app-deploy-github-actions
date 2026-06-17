@@ -1,7 +1,7 @@
 param appName string = 'nodejs-app'
 param location string = resourceGroup().location
 param acrName string
-// ❌ REMOVED containerImage from here
+param userAssignedIdentityName string
 
 // ─── Log Analytics Workspace ───────────────────────────────
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -23,8 +23,13 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
     name: 'Basic'
   }
   properties: {
-    adminUserEnabled: true
+    adminUserEnabled: false
   }
+}
+
+// ─── User Assigned Identity (existing) ────────────────────
+resource uami 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing = {
+  name: userAssignedIdentityName
 }
 
 // ─── Container Apps Environment ────────────────────────────
@@ -42,12 +47,21 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-11-02-preview' 
   }
 }
 
-// ─── Container App (with placeholder image first) ──────────
+// ─── Container App ─────────────────────────────────────────
 resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
   name: '${appName}-container'
   location: location
+
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${uami.id}': {}
+    }
+  }
+
   properties: {
     managedEnvironmentId: containerAppEnv.id
+
     configuration: {
       ingress: {
         external: true
@@ -55,25 +69,19 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
         transport: 'http'
         allowInsecure: false
       }
+
       registries: [
         {
           server: acr.properties.loginServer
-          username: acr.listCredentials().username
-          passwordSecretRef: 'acr-password'
-        }
-      ]
-      secrets: [
-        {
-          name: 'acr-password'
-          value: acr.listCredentials().passwords[0].value
+          identity: uami.id
         }
       ]
     }
+
     template: {
       containers: [
         {
           name: appName
-          // ✅ use a placeholder image first
           image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           resources: {
             cpu: json('0.5')
@@ -91,6 +99,7 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
           ]
         }
       ]
+
       scale: {
         minReplicas: 1
         maxReplicas: 5
@@ -99,7 +108,5 @@ resource containerApp 'Microsoft.App/containerApps@2023-11-02-preview' = {
   }
 }
 
-// ─── Outputs ───────────────────────────────────────────────
 output acrLoginServer string = acr.properties.loginServer
 output containerAppName string = containerApp.name
-output logAnalyticsId string = logAnalytics.properties.customerId
