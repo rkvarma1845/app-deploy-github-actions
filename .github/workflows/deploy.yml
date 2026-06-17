@@ -40,17 +40,28 @@ jobs:
             ${{ env.IDENTITY_NAME }} \
             ${{ env.ACR_NAME }}
 
+      # - name: Deploy Infrastructure
+      #   uses: azure/arm-deploy@v2
+      #   with:
+      #     subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #     resourceGroupName: ${{ env.RESOURCE_GROUP }}
+      #     template: ./main.bicep
+      #     parameters: >
+      #       appName=${{ env.APP_NAME }}
+      #       acrName=${{ env.ACR_NAME }}
+      #       userAssignedIdentityName=${{ env.IDENTITY_NAME }}
+      #     additionalArguments: --debug --verbose
       - name: Deploy Infrastructure
-        uses: azure/arm-deploy@v2
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP }}
-          template: ./main.bicep
-          parameters: >
-            appName=${{ env.APP_NAME }}
-            acrName=${{ env.ACR_NAME }}
-            userAssignedIdentityName=${{ env.IDENTITY_NAME }}
-          additionalArguments: --debug --verbose
+        run: |
+          az deployment group create \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --template-file main.bicep \
+            --parameters \
+              appName=${{ env.APP_NAME }} \
+              acrName=${{ env.ACR_NAME }} \
+              userAssignedIdentityName=${{ env.IDENTITY_NAME }} \
+            --debug \
+            --verbose
 
   deploy:
     runs-on: ubuntu-latest
