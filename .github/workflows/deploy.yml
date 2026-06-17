@@ -34,7 +34,7 @@ jobs:
       - name: Create User Assigned Identity
         run: |
           chmod +x create-identity.sh
-          ./scripts/create-identity.sh \
+          ./create-identity.sh \
             ${{ env.RESOURCE_GROUP }} \
             ${{ env.LOCATION }} \
             ${{ env.IDENTITY_NAME }} \
