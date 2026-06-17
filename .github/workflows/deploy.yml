@@ -50,7 +50,7 @@ jobs:
             appName=${{ env.APP_NAME }}
             acrName=${{ env.ACR_NAME }}
             userAssignedIdentityName=${{ env.IDENTITY_NAME }}
-          additionalArguments: --verbose
+          additionalArguments: --debug --verbose
 
   deploy:
     runs-on: ubuntu-latest
